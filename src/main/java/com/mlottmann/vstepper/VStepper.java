@@ -13,8 +13,9 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
+import java.util.stream.Collectors;
 /**
  * @author Matthias Lottmann
  * <p>
@@ -24,7 +25,8 @@ import java.util.List;
 @JsModule("./v-stepper.js")
 public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize, HasStyle {
 
-	private final List<Step> steps;
+	private List<Step> steps;
+	private final List<Step> allSteps;
 	private Step currentStep;
 
 	@Id
@@ -44,7 +46,8 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	private Button finish;
 
 	public VStepper() {
-		this.steps = new ArrayList<>();
+		this.steps = Collections.emptyList();
+		this.allSteps = new ArrayList<>();
 		initFooter();
 	}
 
@@ -126,6 +129,12 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 		finish.setEnabled(currentStep.isValid());
 	}
 
+	protected void updateSteps() {
+		header.removeAll();
+		steps = allSteps.stream().filter(p-> p.isVisible()).collect(Collectors.toList());
+		steps.forEach(s -> header.add(s.getHeader()));
+	}
+	
 	private Step getNextStep(Step step) {
 		if (isLastStep(step)) {
 			return step;
@@ -147,14 +156,15 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	private boolean isLastStep(Step step) {
 		return steps.indexOf(step) == steps.size() - 1;
 	}
-
+	
+	
 	/**
 	 * Adds a new step with the given content component and a default header component to the stepper.
 	 *
 	 * @param stepContent the content to display when the corresponding step is reached.
 	 */
-	public void addStep(Component stepContent) {
-		addStep("", stepContent);
+	public Step addStep(Component stepContent) {
+		return addStep("", stepContent);
 	}
 
 	/**
@@ -164,9 +174,9 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	 * @param stepTitle   the title to display in the default header component.
 	 * @param stepContent the content to display when the corresponding step is reached.
 	 */
-	public void addStep(String stepTitle, Component stepContent) {
-		StepHeader stepHeader = new DefaultStepHeader(steps.size() + 1, stepTitle);
-		addStep(stepHeader, stepContent);
+	public Step addStep(String stepTitle, Component stepContent) {
+		StepHeader stepHeader = new DefaultStepHeader(allSteps.size() + 1, stepTitle);
+		return addStep(stepHeader, stepContent);
 	}
 
 	/**
@@ -175,9 +185,9 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	 * @param stepHeader  the header component of this step to display in the header of the stepper.
 	 * @param stepContent the content to display when the corresponding step is reached.
 	 */
-	public void addStep(Component stepHeader, Component stepContent) {
+	public Step addStep(Component stepHeader, Component stepContent) {
 		Step step = new DefaultStep(stepHeader, stepContent);
-		addStep(step);
+		return addStep(step);
 	}
 
 	/**
@@ -185,16 +195,20 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	 *
 	 * @param step the step to add to the stepper. Each step consists of a header and a content component.
 	 */
-	public void addStep(Step step) throws IllegalArgumentException {
+	public Step addStep(Step step) throws IllegalArgumentException {
 		checkStep(step);
 		step.addValidationListener(event -> updateButtonEnabledState());
-		header.add(step.getHeader());
-		steps.add(step);
-		if (currentStep == null) {
+		step.addChangedListener(listener -> updateSteps());
+		allSteps.add(step);
+		updateSteps();
+		if (currentStep == null && step.isVisible()) {
 			showFirstStep(step);
 		}
+		
+		return step;
 	}
-
+	
+	
 	private void checkStep(Step step) throws IllegalArgumentException {
 		if (step.getHeader() == null) {
 			throw new IllegalArgumentException("Step header can not be null.");

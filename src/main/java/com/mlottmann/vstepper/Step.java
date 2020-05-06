@@ -21,6 +21,9 @@ public abstract class Step {
 	@Getter
 	private Component content;
 
+	private boolean visible = true;
+	
+	
 	public Step() {
 		this.listeners = new HashMap<>();
 	}
@@ -98,7 +101,11 @@ public abstract class Step {
 	public Registration addValidationListener(ValidationStepListener listener) {
 		return addListener(ValidationStepListener.class, listener);
 	}
-
+	
+	public Registration addChangedListener(StepChangedListener listener) {
+		return addListener(StepChangedListener.class, listener);
+	}
+	
 	private <E extends StepEventListener> Registration addListener(Class<E> listenerType, E listener) throws IllegalArgumentException {
 		if (listener == null) {
 			throw new IllegalArgumentException("Listener cant be null");
@@ -162,4 +169,14 @@ public abstract class Step {
 
 	public abstract boolean isValid();
 
+	
+	public boolean isVisible() {
+		return visible;
+	}
+
+	
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
+	
 }

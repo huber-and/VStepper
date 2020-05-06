@@ -5,7 +5,7 @@
 
     <groupId>com.mlottmann.VStepper</groupId>
     <artifactId>VStepper</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9-SNAPSHOT</version>
     <name>VStepper</name>
 
     <properties>
@@ -114,6 +114,9 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jetty.version}</version>
                 <configuration>
+                  <httpConnector>
+						<port>9000</port>
+					</httpConnector>
                     <scanIntervalSeconds>3</scanIntervalSeconds>
                     <!-- Use test scope because the UI/demo classes are in
                             the test package. -->

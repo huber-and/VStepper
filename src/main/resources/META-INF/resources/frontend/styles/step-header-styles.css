@@ -5,6 +5,9 @@
     width: 100%;
     align-items: center;
 }
+.step-header[hidden] {
+    display: none;
+}
 
 .step-header:after {
     height: 1px;
