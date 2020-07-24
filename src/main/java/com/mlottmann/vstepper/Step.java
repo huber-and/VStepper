@@ -155,7 +155,7 @@ public abstract class Step {
 
 	protected void updateValidationListeners() {
 		ValidationChangedEvent event = new ValidationChangedEvent(this, isValid());
-		listeners.get(ValidationStepListener.class).forEach(stepEventListener -> {
+		getListeners(ValidationStepListener.class).forEach(stepEventListener -> {
 			((ValidationStepListener) stepEventListener).onValidationChange(event);
 		});
 	}
@@ -177,6 +177,15 @@ public abstract class Step {
 	
 	public void setVisible(boolean visible) {
 		this.visible = visible;
+		stepChanged();
 	}
+
+	protected void stepChanged() {
+		StepChangedEvent event = new StepChangedEvent(this);
+		getListeners(StepChangedListener.class).forEach(stepEventListener -> {
+			((StepChangedListener) stepEventListener).onChanged(event);
+		});
+	}
+	
 	
 }
