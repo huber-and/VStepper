@@ -28,6 +28,7 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	private List<Step> steps;
 	private final List<Step> allSteps;
 	private Step currentStep;
+	private ValidationMode validationMode = ValidationMode.ON_CHANGE;
 
 	@Id
 	private Div header;
@@ -92,9 +93,11 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	}
 
 	private void showNextStep() {
-		currentStep.complete();
-		Step nextStep = getNextStep(currentStep);
-		changeStep(nextStep);
+		if (currentStep.isValid()) {
+			currentStep.complete();
+			Step nextStep = getNextStep(currentStep);
+			changeStep(nextStep);
+		}
 	}
 
 	private void showPreviousStep() {
@@ -125,8 +128,10 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	}
 
 	private void updateButtonEnabledState() {
-		next.setEnabled(currentStep.isValid());
-		finish.setEnabled(currentStep.isValid());
+		if (validationMode == ValidationMode.ON_CHANGE) {
+			next.setEnabled(currentStep.isValid());
+			finish.setEnabled(currentStep.isValid());
+		}
 	}
 
 	protected void updateSteps() {
@@ -156,8 +161,7 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	private boolean isLastStep(Step step) {
 		return steps.indexOf(step) == steps.size() - 1;
 	}
-	
-	
+
 	/**
 	 * Adds a new step with the given content component and a default header component to the stepper.
 	 *
@@ -207,8 +211,7 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 		
 		return step;
 	}
-	
-	
+
 	private void checkStep(Step step) throws IllegalArgumentException {
 		if (step.getHeader() == null) {
 			throw new IllegalArgumentException("Step header can not be null.");
@@ -273,5 +276,10 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 		finish.setText(text);
 	}
 
+	public void setValidationMode(ValidationMode validationMode) {
+		this.validationMode = validationMode;
+		next.setEnabled(validationMode == ValidationMode.ON_NEXT || currentStep.isValid());
+		finish.setEnabled(validationMode == ValidationMode.ON_NEXT || currentStep.isValid());
+	}
 
 }

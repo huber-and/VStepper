@@ -1,20 +1,7 @@
 package com.mlottmann;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-
-import com.mlottmann.vstepper.BinderContent;
-import com.mlottmann.vstepper.Step;
-import com.mlottmann.vstepper.StepContent;
-import com.mlottmann.vstepper.StepHeader;
-import com.mlottmann.vstepper.VStepper;
-import com.mlottmann.vstepper.stepEvent.AbortEvent;
-import com.mlottmann.vstepper.stepEvent.AbortStepListener;
-import com.mlottmann.vstepper.stepEvent.CompleteEvent;
-import com.mlottmann.vstepper.stepEvent.CompleteStepListener;
-import com.mlottmann.vstepper.stepEvent.EnterEvent;
-import com.mlottmann.vstepper.stepEvent.EnterStepListener;
+import com.mlottmann.vstepper.*;
+import com.mlottmann.vstepper.stepEvent.*;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -33,9 +20,12 @@ import com.vaadin.flow.data.binder.ValueContext;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Route("demo")
 @CssImport(value = "./styles/stepper-test-styles.css", themeFor = "v-stepper")
@@ -75,7 +65,8 @@ public class View extends DemoView {
 		Div lastName = createLastNameRow(binder);
 		Div birthDate = createBirthDateRow(binder);
 
-		BinderContent<Person> content = new BinderContent<>(binder, firstName, lastName, birthDate);
+		BinderContent<Person> content = new BinderContent<>(binder,
+				firstName, lastName, birthDate);
 		content.setValue(person);
 		content.addClassName("custom-content");
 		content.setWidth("100%");
@@ -85,25 +76,27 @@ public class View extends DemoView {
 
 	private Div createFirstNameRow(Binder<Person> binder) {
 		TextField firstName = createInput("Please enter your first name");
-		binder.forField(firstName).withValidator(new Validator<String>() {
-
-			@Override
-			public ValidationResult apply(String s, ValueContext valueContext) {
-				return s.isEmpty() ? ValidationResult.error("First name can not be empty") : ValidationResult.ok();
-			}
-		}).bind(Person::getFirstName, Person::setFirstName);
+		binder.forField(firstName)
+				.withValidator(new Validator<String>() {
+					@Override
+					public ValidationResult apply(String s, ValueContext valueContext) {
+						return s.isEmpty() ? ValidationResult.error("First name can not be empty") : ValidationResult.ok();
+					}
+				})
+				.bind(Person::getFirstName, Person::setFirstName);
 		return createRow("First Name:", firstName);
 	}
 
 	private Div createLastNameRow(Binder<Person> binder) {
 		TextField lastName = createInput("Please enter your last name");
-		binder.forField(lastName).withValidator(new Validator<String>() {
-
-			@Override
-			public ValidationResult apply(String s, ValueContext valueContext) {
-				return s.isEmpty() ? ValidationResult.error("Last name can not be empty") : ValidationResult.ok();
-			}
-		}).bind(Person::getLastName, Person::setLastName);
+		binder.forField(lastName)
+				.withValidator(new Validator<String>() {
+					@Override
+					public ValidationResult apply(String s, ValueContext valueContext) {
+						return s.isEmpty() ? ValidationResult.error("Last name can not be empty") : ValidationResult.ok();
+					}
+				})
+				.bind(Person::getLastName, Person::setLastName);
 		return createRow("Last Name:", lastName);
 	}
 
@@ -111,13 +104,14 @@ public class View extends DemoView {
 		DatePicker birthDate = new DatePicker();
 		birthDate.setPlaceholder("Please enter you date of birth");
 		birthDate.setWidth("270px");
-		binder.forField(birthDate).withValidator(new Validator<LocalDate>() {
-
-			@Override
-			public ValidationResult apply(LocalDate date, ValueContext valueContext) {
-				return date == null ? ValidationResult.error("Birth date can not be empty") : ValidationResult.ok();
-			}
-		}).bind(Person::getBirthDate, Person::setBirthDate);
+		binder.forField(birthDate)
+				.withValidator(new Validator<LocalDate>() {
+					@Override
+					public ValidationResult apply(LocalDate date, ValueContext valueContext) {
+						return date == null ? ValidationResult.error("Birth date can not be empty") : ValidationResult.ok();
+					}
+				})
+				.bind(Person::getBirthDate, Person::setBirthDate);
 		return createRow("Date of Birth:", birthDate);
 	}
 
@@ -127,7 +121,8 @@ public class View extends DemoView {
 		Div postalCode = createPostalCodeRow(binder);
 		Div country = createCountryRow(binder);
 
-		BinderContent<Address> content = new BinderContent(binder, streetName, postalCode, country);
+		BinderContent<Address> content = new BinderContent(binder,
+				streetName, postalCode, country);
 		content.setValue(address);
 		content.addClassName("custom-content");
 		content.setWidth("100%");
@@ -137,25 +132,27 @@ public class View extends DemoView {
 
 	private Div createStreetNameRow(Binder<Address> binder) {
 		TextField streetName = createInput("Please enter street name");
-		binder.forField(streetName).withValidator(new Validator<String>() {
-
-			@Override
-			public ValidationResult apply(String s, ValueContext valueContext) {
-				return s.isEmpty() ? ValidationResult.error("Street name can not be empty") : ValidationResult.ok();
-			}
-		}).bind(Address::getStreetName, Address::setStreetName);
+		binder.forField(streetName)
+				.withValidator(new Validator<String>() {
+					@Override
+					public ValidationResult apply(String s, ValueContext valueContext) {
+						return s.isEmpty() ? ValidationResult.error("Street name can not be empty") : ValidationResult.ok();
+					}
+				})
+				.bind(Address::getStreetName, Address::setStreetName);
 		return createRow("Street Name:", streetName);
 	}
 
 	private Div createPostalCodeRow(Binder<Address> binder) {
 		TextField postalCode = createInput("Please enter your postal code");
-		binder.forField(postalCode).withValidator(new Validator<String>() {
-
-			@Override
-			public ValidationResult apply(String s, ValueContext valueContext) {
-				return s.isEmpty() ? ValidationResult.error("Postal code can not be empty") : ValidationResult.ok();
-			}
-		}).bind(Address::getPostalCode, Address::setPostalCode);
+		binder.forField(postalCode)
+				.withValidator(new Validator<String>() {
+					@Override
+					public ValidationResult apply(String s, ValueContext valueContext) {
+						return s.isEmpty() ? ValidationResult.error("Postal code can not be empty") : ValidationResult.ok();
+					}
+				})
+				.bind(Address::getPostalCode, Address::setPostalCode);
 		return createRow("Postal Code:", postalCode);
 	}
 
@@ -165,13 +162,14 @@ public class View extends DemoView {
 		countries.setItems(Locale.getISOCountries());
 		countries.setPlaceholder("Please select a country");
 		countries.setWidth("270px");
-		binder.forField(countries).withValidator(new Validator<String>() {
-
-			@Override
-			public ValidationResult apply(String s, ValueContext valueContext) {
-				return s == null ? ValidationResult.error("Country can not be empty") : ValidationResult.ok();
-			}
-		}).bind(Address::getCountry, Address::setCountry);
+		binder.forField(countries)
+				.withValidator(new Validator<String>() {
+					@Override
+					public ValidationResult apply(String s, ValueContext valueContext) {
+						return s == null ? ValidationResult.error("Country can not be empty") : ValidationResult.ok();
+					}
+				})
+				.bind(Address::getCountry, Address::setCountry);
 		return createRow("Country:", countries);
 	}
 
@@ -272,7 +270,6 @@ public class View extends DemoView {
 	@Getter
 	@Setter
 	private class Person {
-
 		private String firstName;
 		private String lastName;
 		private LocalDate birthDate;
@@ -281,7 +278,6 @@ public class View extends DemoView {
 	@Getter
 	@Setter
 	private class Address {
-
 		private String StreetName;
 		private String PostalCode;
 		private String Country;
@@ -296,8 +292,8 @@ public class View extends DemoView {
 		stepper.addStep(new Label("Step 1 Content"));
 		stepper.addStep(new TextField("Step 2 Content"));
 		stepper.addStep(new Checkbox("Step 3 Content"));
-		stepper.addFinishListener(
-			buttonClickEvent -> Notification.show("Finished", 1000, Notification.Position.MIDDLE));
+		stepper.addFinishListener(buttonClickEvent ->
+				Notification.show("Finished", 1000, Notification.Position.MIDDLE));
 		// end-source-example
 		addCard("Basic Usage", "Simple Stepper", stepper);
 	}
@@ -310,8 +306,8 @@ public class View extends DemoView {
 		stepper.addStep("Step 1", new Label("Step 1 Content"));
 		stepper.addStep("Step 2", new TextField("Step 2 Content"));
 		stepper.addStep("Step 3", new Checkbox("Step 3 Content"));
-		stepper.addFinishListener(
-			buttonClickEvent -> Notification.show("Finished", 1000, Notification.Position.MIDDLE));
+		stepper.addFinishListener(buttonClickEvent ->
+				Notification.show("Finished", 1000, Notification.Position.MIDDLE));
 		// end-source-example
 		addCard("Basic Usage", "Header Captions", stepper);
 	}
@@ -325,11 +321,14 @@ public class View extends DemoView {
 		stepper.addStep(new TextField("Step 2 Content"));
 		stepper.addStep(new Checkbox("Step 3 Content"));
 		stepper.setCancelVisible(true);
-		stepper.addCancelListener(buttonClickEvent -> Notification.show("Cancel", 1000, Notification.Position.MIDDLE));
-		stepper.addBackListener(buttonClickEvent -> Notification.show("Back", 1000, Notification.Position.MIDDLE));
-		stepper.addNextListener(buttonClickEvent -> Notification.show("Next", 1000, Notification.Position.MIDDLE));
-		stepper.addFinishListener(
-			buttonClickEvent -> Notification.show("Finished", 1000, Notification.Position.MIDDLE));
+		stepper.addCancelListener(buttonClickEvent ->
+				Notification.show("Cancel", 1000, Notification.Position.MIDDLE));
+		stepper.addBackListener(buttonClickEvent ->
+				Notification.show("Back", 1000, Notification.Position.MIDDLE));
+		stepper.addNextListener(buttonClickEvent ->
+				Notification.show("Next", 1000, Notification.Position.MIDDLE));
+		stepper.addFinishListener(buttonClickEvent ->
+				Notification.show("Finished", 1000, Notification.Position.MIDDLE));
 		// end-source-example
 		addCard("Basic Usage", "Button Listeners", stepper);
 	}
@@ -341,13 +340,13 @@ public class View extends DemoView {
 		stepper.addStep(new CustomHeader("Step 1"), new Label("Step 1"));
 		stepper.addStep(new CustomHeader("Step 2"), new Label("Step 2"));
 		stepper.addStep(new CustomHeader("Step 3"), new Label("Step 3"));
-		stepper.addFinishListener(
-			buttonClickEvent -> Notification.show("Finished", 1000, Notification.Position.MIDDLE));
+		stepper.addFinishListener(buttonClickEvent ->
+				Notification.show("Finished", 1000, Notification.Position.MIDDLE));
 		addCard("Advanced Usage", "Custom Headers", stepper);
 	}
 
 	private class CustomHeader extends StepHeader
-		implements AbortStepListener, CompleteStepListener, EnterStepListener {
+			implements AbortStepListener, CompleteStepListener, EnterStepListener {
 
 		private Label state;
 
@@ -360,19 +359,19 @@ public class View extends DemoView {
 
 		@Override
 		public void onAbort(AbortEvent event) {
-			super.onAbort(event); // Needed to attach/detach CSS classes
+			super.onAbort(event); //Needed to attach/detach CSS classes
 			state.setText("Inactive");
 		}
 
 		@Override
 		public void onComplete(CompleteEvent event) {
-			super.onComplete(event); // Needed to attach/detach CSS classes
+			super.onComplete(event); //Needed to attach/detach CSS classes
 			state.setText("Complete");
 		}
 
 		@Override
 		public void onEnter(EnterEvent event) {
-			super.onEnter(event); // Needed to attach/detach CSS classes
+			super.onEnter(event); //Needed to attach/detach CSS classes
 			state.setText("Active");
 		}
 	}
@@ -385,8 +384,9 @@ public class View extends DemoView {
 		stepper.addStep("Step 1", new CustomContent());
 		stepper.addStep("Step 2", new CustomContent());
 		stepper.addStep("Step 3", new CustomContent());
-		stepper.addFinishListener(
-			buttonClickEvent -> Notification.show("Finished", 1000, Notification.Position.MIDDLE));
+		stepper.addFinishListener(buttonClickEvent ->
+				Notification.show("Finished", 1000, Notification.Position.MIDDLE));
+		stepper.setValidationMode(ValidationMode.ON_NEXT);
 		addCard("Advanced Usage", "Custom Content", stepper);
 	}
 
@@ -411,12 +411,14 @@ public class View extends DemoView {
 
 		@Override
 		public void onAbort(AbortEvent event) {
-			Notification.show("Discarded: " + input.getValue(), 1000, Notification.Position.MIDDLE);
+			Notification.show("Discarded: " + input.getValue(),
+					1000, Notification.Position.MIDDLE);
 		}
 
 		@Override
 		public void onComplete(CompleteEvent event) {
-			Notification.show("Saved: " + input.getValue(), 1000, Notification.Position.MIDDLE);
+			Notification.show("Saved: " + input.getValue(),
+					1000, Notification.Position.MIDDLE);
 		}
 
 		@Override
@@ -433,8 +435,8 @@ public class View extends DemoView {
 		stepper.addStep(new CustomStep("Step 1"));
 		stepper.addStep(new CustomStep("Step 2"));
 		stepper.addStep(new CustomStep("Step 3"));
-		stepper.addFinishListener(
-			buttonClickEvent -> Notification.show("Finished", 1000, Notification.Position.MIDDLE));
+		stepper.addFinishListener(buttonClickEvent ->
+				Notification.show("Finished", 1000, Notification.Position.MIDDLE));
 		addCard("Advanced Usage", "Custom Steps", stepper);
 	}
 
