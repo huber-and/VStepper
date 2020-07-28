@@ -2,6 +2,7 @@
 /.classpath
 /.settings/
 /target/
+/node/
 **/.project
 **/.classpath
 **/.settings/
