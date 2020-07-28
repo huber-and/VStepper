@@ -24,7 +24,5 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
-#    - name: Publish to GitHub Packages Apache Maven
-#      run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
-#      env:
-#        GITHUB_TOKEN: ${{ github.token }}
+    - name: Publish to GitHub Packages Apache Maven
+      run: mvn deploy -Dregistry=https://maven.pkg.github.com/iot-invent -Dtoken=dff2e062f90f8a0ef5c5fd9a63e46d008db6193d
