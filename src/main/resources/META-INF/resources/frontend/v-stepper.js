@@ -9,9 +9,14 @@ class VStepper extends ThemableMixin(PolymerElement) {
     static get template() {
         return html`
             <style include="stepper-styles step-header-styles lumo-color lumo-spacing"></style>
-            <div id="header" class="header" part="header"></div>
-            <div id="content" class="content" part="content"></div>
-            <div id="footer" class="footer" part="footer"></div>
+            <slot name="header"></slot>
+            <slot name="content"></slot>
+            <slot name="footer"></slot>
+            <div class="overlay">
+            	<slot name="overlay-header"></slot>
+            	<slot name="overlay-content"></slot>
+            	<slot name="overlay-footer"></slot>
+            </div>
         `;
     }
 

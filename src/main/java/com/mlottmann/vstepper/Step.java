@@ -1,34 +1,46 @@
 package com.mlottmann.vstepper;
 
-import com.mlottmann.vstepper.stepEvent.*;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.shared.Registration;
-import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.mlottmann.vstepper.stepEvent.AbortEvent;
+import com.mlottmann.vstepper.stepEvent.AbortStepListener;
+import com.mlottmann.vstepper.stepEvent.CompleteEvent;
+import com.mlottmann.vstepper.stepEvent.CompleteStepListener;
+import com.mlottmann.vstepper.stepEvent.EnterEvent;
+import com.mlottmann.vstepper.stepEvent.EnterStepListener;
+import com.mlottmann.vstepper.stepEvent.StepChangedEvent;
+import com.mlottmann.vstepper.stepEvent.StepChangedListener;
+import com.mlottmann.vstepper.stepEvent.StepEventListener;
+import com.mlottmann.vstepper.stepEvent.ValidationChangedEvent;
+import com.mlottmann.vstepper.stepEvent.ValidationStepListener;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.shared.Registration;
+
+import lombok.Getter;
 
 /**
  * Container class containing the header and content component of a step also handles firing step events.
  */
 public abstract class Step {
 
-	private Map<Class<? extends StepEventListener>, List<? extends StepEventListener>> listeners;
+	private final Map<Class<? extends StepEventListener>, List<? extends StepEventListener>> listeners;
 	@Getter
 	private Component header;
 	@Getter
 	private Component content;
+	@Getter
+	private Component overlayContent;
 
 	private boolean visible = true;
-	
-	
+
 	public Step() {
-		this.listeners = new HashMap<>();
+		listeners = new HashMap<>();
 	}
 
-	public Step(Component header, Component content) {
+	public Step(final Component header, final Component content) {
 		this();
 		setHeader(header);
 		setContent(content);
@@ -37,80 +49,93 @@ public abstract class Step {
 	/**
 	 * Sets the header component of this step and registers it as a listener if necessary.
 	 *
-	 * @param header the header component of this step.
+	 * @param header
+	 *            the header component of this step.
 	 */
-	public void setHeader(Component header) {
+	public void setHeader(final Component header) {
 		removeListener(this.header);
 		this.header = header;
 		addListener(this.header);
 	}
 
 	/**
+	 * Sets the overlay content component of this step and registers it as a listener if necessary.
+	 *
+	 * @param overlayContent
+	 *            the overlayContent component of this step.
+	 */
+	public void setOverlayContent(final Component overlayContent) {
+		removeListener(this.overlayContent);
+		this.overlayContent = overlayContent;
+		addListener(this.overlayContent);
+	}
+
+	/**
 	 * Sets the content component of this step and registers it as a listener if necessary.
 	 *
-	 * @param content the content component of this step.
+	 * @param content
+	 *            the content component of this step.
 	 */
-	public void setContent(Component content) {
+	public void setContent(final Component content) {
 		removeListener(this.content);
 		this.content = content;
 		addListener(this.content);
 		listenTo(this.content);
 	}
 
-	private void removeListener(Component component) {
+	private void removeListener(final Component component) {
 		if (component instanceof StepEventListener) {
-			StepEventListener listener = (StepEventListener) component;
+			final StepEventListener listener = (StepEventListener) component;
 			listeners.values().forEach(stepEventListeners -> {
 				stepEventListeners.remove(listener);
 			});
 		}
 	}
 
-	private void addListener(Component component) {
+	private void addListener(final Component component) {
 		addListener(component, EnterStepListener.class);
 		addListener(component, AbortStepListener.class);
 		addListener(component, CompleteStepListener.class);
 	}
 
-	private <T extends StepEventListener> void addListener(Component component, Class<T> listerType) {
+	private <T extends StepEventListener> void addListener(final Component component, final Class<T> listerType) {
 		if (listerType.isAssignableFrom(component.getClass())) {
 			addListener(listerType, listerType.cast(component));
 		}
 	}
 
-	private void listenTo(Component component) {
-		if (this.content instanceof ValidationContent) {
-			((ValidationContent) content)
-					.addValidationListener(isValid -> updateValidationListeners());
+	private void listenTo(final Component component) {
+		if (content instanceof ValidationContent) {
+			((ValidationContent) content).addValidationListener(isValid -> updateValidationListeners());
 		}
 	}
 
-
-	public Registration addEnterListener(EnterStepListener listener) {
+	public Registration addEnterListener(final EnterStepListener listener) {
 		return addListener(EnterStepListener.class, listener);
 	}
 
-	public Registration addAbortListener(AbortStepListener listener) {
+	public Registration addAbortListener(final AbortStepListener listener) {
 		return addListener(AbortStepListener.class, listener);
 	}
 
-	public Registration addCompleteListener(CompleteStepListener listener) {
+	public Registration addCompleteListener(final CompleteStepListener listener) {
 		return addListener(CompleteStepListener.class, listener);
 	}
 
-	public Registration addValidationListener(ValidationStepListener listener) {
+	public Registration addValidationListener(final ValidationStepListener listener) {
 		return addListener(ValidationStepListener.class, listener);
 	}
-	
-	public Registration addChangedListener(StepChangedListener listener) {
+
+	public Registration addChangedListener(final StepChangedListener listener) {
 		return addListener(StepChangedListener.class, listener);
 	}
-	
-	private <E extends StepEventListener> Registration addListener(Class<E> listenerType, E listener) throws IllegalArgumentException {
+
+	private <E extends StepEventListener> Registration addListener(final Class<E> listenerType, final E listener)
+			throws IllegalArgumentException {
 		if (listener == null) {
 			throw new IllegalArgumentException("Listener cant be null");
 		}
-		List<E> list = (List) this.listeners.computeIfAbsent(listenerType, (key) -> {
+		final List<E> list = (List) listeners.computeIfAbsent(listenerType, (key) -> {
 			return new ArrayList();
 		});
 		list.add(listener);
@@ -122,9 +147,8 @@ public abstract class Step {
 	 */
 	public void enter() {
 		onEnter();
-		EnterEvent event = new EnterEvent(this);
-		getListeners(EnterStepListener.class).forEach(enterStepListener ->
-				enterStepListener.onEnter(event));
+		final EnterEvent event = new EnterEvent(this);
+		getListeners(EnterStepListener.class).forEach(enterStepListener -> enterStepListener.onEnter(event));
 	}
 
 	protected abstract void onEnter();
@@ -134,9 +158,8 @@ public abstract class Step {
 	 */
 	public void abort() {
 		onAbort();
-		AbortEvent event = new AbortEvent(this);
-		getListeners(AbortStepListener.class).forEach(abortStepListener ->
-				abortStepListener.onAbort(event));
+		final AbortEvent event = new AbortEvent(this);
+		getListeners(AbortStepListener.class).forEach(abortStepListener -> abortStepListener.onAbort(event));
 	}
 
 	protected abstract void onAbort();
@@ -146,22 +169,22 @@ public abstract class Step {
 	 */
 	public void complete() {
 		onComplete();
-		CompleteEvent event = new CompleteEvent(this);
-		getListeners(CompleteStepListener.class).forEach(completeStepListener ->
-				completeStepListener.onComplete(event));
+		final CompleteEvent event = new CompleteEvent(this);
+		getListeners(CompleteStepListener.class)
+				.forEach(completeStepListener -> completeStepListener.onComplete(event));
 	}
 
 	protected abstract void onComplete();
 
 	protected void updateValidationListeners() {
-		ValidationChangedEvent event = new ValidationChangedEvent(this, isValid());
+		final ValidationChangedEvent event = new ValidationChangedEvent(this, isValid());
 		getListeners(ValidationStepListener.class).forEach(stepEventListener -> {
-			((ValidationStepListener) stepEventListener).onValidationChange(event);
+			stepEventListener.onValidationChange(event);
 		});
 	}
 
-	private <E extends StepEventListener> List<E> getListeners(Class<E> listenerType) {
-		List<E> registeredListeners = (List) this.listeners.computeIfAbsent(listenerType, (key) -> {
+	private <E extends StepEventListener> List<E> getListeners(final Class<E> listenerType) {
+		final List<E> registeredListeners = (List) listeners.computeIfAbsent(listenerType, (key) -> {
 			return new ArrayList();
 		});
 		return registeredListeners;
@@ -169,23 +192,20 @@ public abstract class Step {
 
 	public abstract boolean isValid();
 
-	
 	public boolean isVisible() {
 		return visible;
 	}
 
-	
-	public void setVisible(boolean visible) {
+	public void setVisible(final boolean visible) {
 		this.visible = visible;
 		stepChanged();
 	}
 
 	protected void stepChanged() {
-		StepChangedEvent event = new StepChangedEvent(this);
+		final StepChangedEvent event = new StepChangedEvent(this);
 		getListeners(StepChangedListener.class).forEach(stepEventListener -> {
-			((StepChangedListener) stepEventListener).onChanged(event);
+			stepEventListener.onChanged(event);
 		});
 	}
-	
-	
+
 }

@@ -4,24 +4,82 @@
     flex-shrink: 0;
 }
 
-.header {
+.wrapper {
+	flex-grow: 1;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+}
+slot[name="header"]::slotted(*) {
+    display: flex;
+    justify-content: flex-end;
     border-bottom: 1px solid var(--lumo-contrast-10pct);
-    margin: var(--lumo-space-m) var(--lumo-space-m) 0 var(--lumo-space-m);
-    padding-bottom: var(--lumo-space-s);
     overflow-x: auto;
 }
 
-.content {
+:host([theme~="frameless"]) slot[name="header"]::slotted(*) {
+	padding: 0;
+	margin: 0;
+}
+:host([theme~="framefull"]) slot[name="header"]::slotted(*) {
+	padding-bottom: var(--lumo-space-s);
+	margin: var(--lumo-space-m) var(--lumo-space-m) 0 var(--lumo-space-m);
+}
+
+slot[name="content"]::slotted(*) {
     display: flex;
     flex-grow: 1;
-    margin: var(--lumo-space-s) var(--lumo-space-m);
     overflow-y: auto;
 }
 
-.footer {
+:host([theme~="frameless"]) slot[name="content"]::slotted(*) {
+	margin: 0;
+}
+:host([theme~="framefull"]) slot[name="content"]::slotted(*) {
+	margin: var(--lumo-space-s) var(--lumo-space-m);
+}
+
+slot[name="overlay-footer"]::slotted(*) {
     display: flex;
     justify-content: space-between;
-    margin: var(--lumo-space-s) var(--lumo-space-m);
+}
+
+slot[name="footer"]::slotted(*) {
+    display: flex;
+    justify-content: space-between;
+}
+
+:host([theme~="frameless"]) slot[name="overlay-content"]::slotted(*) {
+	flex-grow: 1;
+}
+:host([theme~="frameless"]) slot[name="footer"]::slotted(*) {
+	margin: 0;
+	position: absolute;
+	right: var(--lumo-space-s);
+	bottom: var(--lumo-space-s);
+}
+:host([theme~="framefull"]) slot[name="footer"]::slotted(*) {
+	margin: var(--lumo-space-s) var(--lumo-space-m);
+}
+:host([theme~="framefull"]) .overlay {
+	display: none;
+}
+:host([theme~="singlelayer"]) .overlay {
+    max-width: 2000px;
+    background-color: rgba(255,255,255,1);
+}
+:host([theme~="multilayer"]) .overlay {
+    max-width: 400px;
+    background-color: rgba(225,225,225,0.7);
+}
+:host([theme~="frameless"]) .overlay {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    transition: max-width 0.5s;
 }

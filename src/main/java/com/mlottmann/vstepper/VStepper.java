@@ -1,41 +1,46 @@
 package com.mlottmann.vstepper;
 
-import com.vaadin.flow.component.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.polymertemplate.Id;
 import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.templatemodel.TemplateModel;
+
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 /**
  * @author Matthias Lottmann
- * <p>
- * Vaadin addon for displaying a series of components one at a time.
+ *         <p>
+ *         Vaadin addon for displaying a series of components one at a time.
  */
 @Tag("v-stepper")
 @JsModule("./v-stepper.js")
-public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize, HasStyle {
+public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize, HasStyle, HasComponents {
 
 	private List<Step> steps;
 	private final List<Step> allSteps;
 	private Step currentStep;
 	private ValidationMode validationMode = ValidationMode.ON_CHANGE;
 
-	@Id
-	private Div header;
-	@Id
-	private Div content;
-	@Id
-	private Div footer;
+	private final Div header = new Div();
+	private final Div content = new Div();
+	private final Div overlayContent = new Div();
+	private final Div footer = new Div();
 
 	@Getter
 	private Button cancel;
@@ -47,27 +52,76 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	private Button finish;
 
 	public VStepper() {
-		this.steps = Collections.emptyList();
-		this.allSteps = new ArrayList<>();
+		steps = Collections.emptyList();
+		allSteps = new ArrayList<>();
+
+		add(header);
+		add(content);
+		add(overlayContent);
+		add(footer);
+
 		initFooter();
+		setFrameless(false);
+		setSinglelayer(false);
+	}
+
+	private void initLayout(final boolean frameless) {
+
+		if (frameless) {
+			header.getElement().setAttribute("slot", "overlay-header");
+			content.getElement().setAttribute("slot", "content");
+			overlayContent.getElement().setAttribute("slot", "overlay-content");
+			footer.getElement().setAttribute("slot", "overlay-footer");
+
+		} else {
+			header.getElement().setAttribute("slot", "header");
+			content.getElement().setAttribute("slot", "content");
+			overlayContent.getElement().setAttribute("slot", "content");
+			footer.getElement().setAttribute("slot", "footer");
+
+		}
+
+	}
+
+	public void setSinglelayer(final boolean singlelayer) {
+		if (singlelayer) {
+			getElement().getThemeList().add("singlelayer");
+			getElement().getThemeList().remove("multilayer");
+		} else {
+			getElement().getThemeList().remove("singlelayer");
+			getElement().getThemeList().add("multilayer");
+		}
+	}
+
+	public void setFrameless(final boolean frameless) {
+		if (frameless) {
+			getElement().getThemeList().add("frameless");
+			getElement().getThemeList().remove("framefull");
+		} else {
+			getElement().getThemeList().remove("frameless");
+			getElement().getThemeList().add("framefull");
+		}
+		initLayout(frameless);
 	}
 
 	/**
-	 * @param components the components to display in the the different stepper steps.
+	 * @param components
+	 *            the components to display in the the different stepper steps.
 	 */
-	public VStepper(Component... components) {
+	public VStepper(final Component... components) {
 		this();
-		for (Component component : components) {
+		for (final Component component : components) {
 			addStep(component);
 		}
 	}
 
 	/**
-	 * @param steps the steps to display in this stepper. A step consists of a header and a content component.
+	 * @param steps
+	 *            the steps to display in this stepper. A step consists of a header and a content component.
 	 */
-	public VStepper(Step... steps) {
+	public VStepper(final Step... steps) {
 		this();
-		for (Step step : steps) {
+		for (final Step step : steps) {
 			addStep(step);
 		}
 	}
@@ -95,22 +149,24 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	private void showNextStep() {
 		if (currentStep.isValid()) {
 			currentStep.complete();
-			Step nextStep = getNextStep(currentStep);
+			final Step nextStep = getNextStep(currentStep);
 			changeStep(nextStep);
 		}
 	}
 
 	private void showPreviousStep() {
 		currentStep.abort();
-		Step previousStep = getPreviousStep(currentStep);
+		final Step previousStep = getPreviousStep(currentStep);
 		changeStep(previousStep);
 	}
 
-	private void changeStep(Step newStep) {
+	private void changeStep(final Step newStep) {
 		content.removeAll();
 		currentStep = newStep;
 		currentStep.enter();
 		content.add(currentStep.getContent());
+		overlayContent.removeAll();
+		overlayContent.add(currentStep.getOverlayContent());
 		updateButtons();
 	}
 
@@ -136,70 +192,76 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 
 	protected void updateSteps() {
 		header.removeAll();
-		steps = allSteps.stream().filter(p-> p.isVisible()).collect(Collectors.toList());
+		steps = allSteps.stream().filter(p -> p.isVisible()).collect(Collectors.toList());
 		steps.forEach(s -> header.add(s.getHeader()));
 	}
-	
-	private Step getNextStep(Step step) {
+
+	private Step getNextStep(final Step step) {
 		if (isLastStep(step)) {
 			return step;
 		}
 		return steps.get(steps.indexOf(step) + 1);
 	}
 
-	private Step getPreviousStep(Step step) {
+	private Step getPreviousStep(final Step step) {
 		if (isFirstStep(step)) {
 			return step;
 		}
 		return steps.get(steps.indexOf(step) - 1);
 	}
 
-	private boolean isFirstStep(Step step) {
+	private boolean isFirstStep(final Step step) {
 		return steps.indexOf(step) == 0;
 	}
 
-	private boolean isLastStep(Step step) {
+	private boolean isLastStep(final Step step) {
 		return steps.indexOf(step) == steps.size() - 1;
 	}
 
 	/**
 	 * Adds a new step with the given content component and a default header component to the stepper.
 	 *
-	 * @param stepContent the content to display when the corresponding step is reached.
+	 * @param stepContent
+	 *            the content to display when the corresponding step is reached.
 	 */
-	public Step addStep(Component stepContent) {
+	public Step addStep(final Component stepContent) {
 		return addStep("", stepContent);
 	}
 
 	/**
-	 * Adds a new step with the given content component and a default header component with the given title to
-	 * the stepper.
+	 * Adds a new step with the given content component and a default header component with the given title to the
+	 * stepper.
 	 *
-	 * @param stepTitle   the title to display in the default header component.
-	 * @param stepContent the content to display when the corresponding step is reached.
+	 * @param stepTitle
+	 *            the title to display in the default header component.
+	 * @param stepContent
+	 *            the content to display when the corresponding step is reached.
 	 */
-	public Step addStep(String stepTitle, Component stepContent) {
-		StepHeader stepHeader = new DefaultStepHeader(allSteps.size() + 1, stepTitle);
+	public Step addStep(final String stepTitle, final Component stepContent) {
+		final StepHeader stepHeader = new DefaultStepHeader(allSteps.size() + 1, stepTitle);
 		return addStep(stepHeader, stepContent);
 	}
 
 	/**
 	 * Adds a new step with the given header component and content component to the stepper.
 	 *
-	 * @param stepHeader  the header component of this step to display in the header of the stepper.
-	 * @param stepContent the content to display when the corresponding step is reached.
+	 * @param stepHeader
+	 *            the header component of this step to display in the header of the stepper.
+	 * @param stepContent
+	 *            the content to display when the corresponding step is reached.
 	 */
-	public Step addStep(Component stepHeader, Component stepContent) {
-		Step step = new DefaultStep(stepHeader, stepContent);
+	public Step addStep(final Component stepHeader, final Component stepContent) {
+		final Step step = new DefaultStep(stepHeader, stepContent);
 		return addStep(step);
 	}
 
 	/**
 	 * Adds the given step to the stepper.
 	 *
-	 * @param step the step to add to the stepper. Each step consists of a header and a content component.
+	 * @param step
+	 *            the step to add to the stepper. Each step consists of a header and a content component.
 	 */
-	public Step addStep(Step step) throws IllegalArgumentException {
+	public Step addStep(final Step step) throws IllegalArgumentException {
 		checkStep(step);
 		step.addValidationListener(event -> updateButtonEnabledState());
 		step.addChangedListener(listener -> updateSteps());
@@ -208,11 +270,11 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 		if (currentStep == null && step.isVisible()) {
 			showFirstStep(step);
 		}
-		
+
 		return step;
 	}
 
-	private void checkStep(Step step) throws IllegalArgumentException {
+	private void checkStep(final Step step) throws IllegalArgumentException {
 		if (step.getHeader() == null) {
 			throw new IllegalArgumentException("Step header can not be null.");
 		}
@@ -221,11 +283,12 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 		}
 	}
 
-	private void showFirstStep(Step step) {
+	private void showFirstStep(final Step step) {
 		currentStep = step;
 		currentStep.enter();
 		next.setEnabled(currentStep.isValid());
 		content.add(currentStep.getContent());
+		overlayContent.add(currentStep.getOverlayContent());
 	}
 
 	/**
@@ -233,7 +296,7 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	 *
 	 * @param visible
 	 */
-	public void setCancelVisible(boolean visible) {
+	public void setCancelVisible(final boolean visible) {
 		footer.removeAll();
 		cancel.setVisible(visible);
 		if (visible) {
@@ -243,40 +306,40 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 		}
 	}
 
-	public Registration addCancelListener(ComponentEventListener<ClickEvent<Button>> listener) {
+	public Registration addCancelListener(final ComponentEventListener<ClickEvent<Button>> listener) {
 		setCancelVisible(true);
 		return cancel.addClickListener(listener);
 	}
 
-	public Registration addNextListener(ComponentEventListener<ClickEvent<Button>> listener) {
+	public Registration addNextListener(final ComponentEventListener<ClickEvent<Button>> listener) {
 		return next.addClickListener(listener);
 	}
 
-	public Registration addBackListener(ComponentEventListener<ClickEvent<Button>> listener) {
+	public Registration addBackListener(final ComponentEventListener<ClickEvent<Button>> listener) {
 		return back.addClickListener(listener);
 	}
 
-	public Registration addFinishListener(ComponentEventListener<ClickEvent<Button>> listener) {
+	public Registration addFinishListener(final ComponentEventListener<ClickEvent<Button>> listener) {
 		return finish.addClickListener(listener);
 	}
 
-	public void setCancelText(String text) {
+	public void setCancelText(final String text) {
 		cancel.setText(text);
 	}
 
-	public void setNextText(String text) {
+	public void setNextText(final String text) {
 		next.setText(text);
 	}
 
-	public void setBackText(String text) {
+	public void setBackText(final String text) {
 		back.setText(text);
 	}
 
-	public void setFinishText(String text) {
+	public void setFinishText(final String text) {
 		finish.setText(text);
 	}
 
-	public void setValidationMode(ValidationMode validationMode) {
+	public void setValidationMode(final ValidationMode validationMode) {
 		this.validationMode = validationMode;
 		next.setEnabled(validationMode == ValidationMode.ON_NEXT || currentStep.isValid());
 		finish.setEnabled(validationMode == ValidationMode.ON_NEXT || currentStep.isValid());
