@@ -30,6 +30,7 @@ import lombok.Getter;
  */
 @Tag("v-stepper")
 @JsModule("./v-stepper.js")
+// TODO: make steps skippable
 public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize, HasStyle, HasComponents {
 
 	private List<Step> steps;
@@ -146,7 +147,7 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 		setCancelVisible(false);
 	}
 
-	private void showNextStep() {
+	public void showNextStep() {
 		if (currentStep.isValid()) {
 			currentStep.complete();
 			final Step nextStep = getNextStep(currentStep);
@@ -154,13 +155,13 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 		}
 	}
 
-	private void showPreviousStep() {
+	public void showPreviousStep() {
 		currentStep.abort();
 		final Step previousStep = getPreviousStep(currentStep);
 		changeStep(previousStep);
 	}
 
-	private void changeStep(final Step newStep) {
+	public void changeStep(final Step newStep) {
 		content.removeAll();
 		currentStep = newStep;
 		currentStep.enter();
@@ -196,25 +197,25 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 		steps.forEach(s -> header.add(s.getHeader()));
 	}
 
-	private Step getNextStep(final Step step) {
+	protected Step getNextStep(final Step step) {
 		if (isLastStep(step)) {
 			return step;
 		}
 		return steps.get(steps.indexOf(step) + 1);
 	}
 
-	private Step getPreviousStep(final Step step) {
+	protected Step getPreviousStep(final Step step) {
 		if (isFirstStep(step)) {
 			return step;
 		}
 		return steps.get(steps.indexOf(step) - 1);
 	}
 
-	private boolean isFirstStep(final Step step) {
+	protected boolean isFirstStep(final Step step) {
 		return steps.indexOf(step) == 0;
 	}
 
-	private boolean isLastStep(final Step step) {
+	protected boolean isLastStep(final Step step) {
 		return steps.indexOf(step) == steps.size() - 1;
 	}
 
