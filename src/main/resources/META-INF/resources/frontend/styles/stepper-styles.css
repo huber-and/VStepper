@@ -71,9 +71,11 @@ slot[name="footer"]::slotted(*) {
     max-width: 400px;
     background-color: var(--prototype-transparent-overlay-background);
 }
+:host([theme~="frameless"][op="r"]) .overlay {
+	right: 0;
+}
 :host([theme~="frameless"]) .overlay {
     position: absolute;
-    right: 0;
     top: 0;
     height: 100%;
     width: 100%;

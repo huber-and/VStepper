@@ -38,6 +38,12 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	private Step currentStep;
 	private ValidationMode validationMode = ValidationMode.ON_CHANGE;
 
+	public enum OLERLAY_POSITION {
+		LEFT, RIGHT
+	};
+
+	private final String ATTR_OVERLAY_POSITION = "op";
+
 	private final Div header = new Div();
 	private final Div content = new Div();
 	private final Div overlayContent = new Div();
@@ -64,6 +70,16 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 		initFooter();
 		setFrameless(false);
 		setSinglelayer(false);
+	}
+
+	public void setOverlayPosition(final OLERLAY_POSITION position) {
+		// this.orientation = orientation;
+		if (position == OLERLAY_POSITION.LEFT) {
+			getElement().setAttribute(ATTR_OVERLAY_POSITION, "l");
+		} else {
+			getElement().setAttribute(ATTR_OVERLAY_POSITION, "r");
+		}
+
 	}
 
 	private void initLayout(final boolean frameless) {
