@@ -70,6 +70,7 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 		initFooter();
 		setFrameless(false);
 		setSinglelayer(false);
+		setOverlapping(true);
 	}
 
 	public void setOverlayPosition(final OLERLAY_POSITION position) {
@@ -107,6 +108,16 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 		} else {
 			getElement().getThemeList().remove("singlelayer");
 			getElement().getThemeList().add("multilayer");
+		}
+	}
+
+	public void setOverlapping(final boolean overlapping) {
+		if (overlapping) {
+			getElement().getThemeList().add("overlapping");
+			getElement().getThemeList().remove("notoverlapping");
+		} else {
+			getElement().getThemeList().remove("overlapping");
+			getElement().getThemeList().add("notoverlapping");
 		}
 	}
 

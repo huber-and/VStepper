@@ -74,6 +74,12 @@ slot[name="footer"]::slotted(*) {
 :host([theme~="frameless"][op="r"]) .overlay {
 	right: 0;
 }
+:host([theme~="notoverlapping"][op="r"]) slot[name="content"]::slotted(*) {
+	margin-right: 400px;
+}
+:host([theme~="notoverlapping"][op="l"]) slot[name="content"]::slotted(*)  {
+	margin-left: 400px;
+}
 :host([theme~="frameless"]) .overlay {
     position: absolute;
     top: 0;
