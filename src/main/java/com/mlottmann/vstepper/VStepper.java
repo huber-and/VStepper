@@ -177,6 +177,7 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 	public void showNextStep() {
 		if (currentStep.isValid()) {
 			currentStep.complete();
+			updateSteps();
 			final Step nextStep = getNextStep(currentStep);
 			changeStep(nextStep);
 		}
@@ -184,6 +185,7 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 
 	public void showPreviousStep() {
 		currentStep.abort();
+		updateSteps();
 		final Step previousStep = getPreviousStep(currentStep);
 		changeStep(previousStep);
 	}
