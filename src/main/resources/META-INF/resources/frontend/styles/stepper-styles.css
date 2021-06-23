@@ -65,11 +65,11 @@ slot[name="footer"]::slotted(*) {
 }
 :host([theme~="singlelayer"]) .overlay {
     max-width: 2000px;
-    background-color: var(--prototype-overlay-background);
+    background-color: var(--overlay-background);
 }
 :host([theme~="multilayer"]) .overlay {
     max-width: 400px;
-    background-color: var(--prototype-transparent-overlay-background);
+    background-color: var(--overlay-background-transparent);
 }
 :host([theme~="frameless"][op="r"]) .overlay {
 	right: 0;
