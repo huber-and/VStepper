@@ -179,6 +179,11 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 			currentStep.complete();
 			updateSteps();
 			final Step nextStep = getNextStep(currentStep);
+			if (nextStep == null) {
+				finish.click();
+				return;
+			}
+			
 			changeStep(nextStep);
 		}
 	}
@@ -228,7 +233,7 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 
 	protected Step getNextStep(final Step step) {
 		if (isLastStep(step)) {
-			return step;
+			return null;
 		}
 		return steps.get(steps.indexOf(step) + 1);
 	}
@@ -314,13 +319,13 @@ public class VStepper extends PolymerTemplate<TemplateModel> implements HasSize,
 		}
 	}
 
-//	private void showFirstStep(final Step step) {
-//		currentStep = step;
-//		currentStep.enter();
-//		content.add(currentStep.getContent());
-//		overlayContent.add(currentStep.getOverlayContent());
-//		updateButtons();
-//	}
+	// private void showFirstStep(final Step step) {
+	// currentStep = step;
+	// currentStep.enter();
+	// content.add(currentStep.getContent());
+	// overlayContent.add(currentStep.getOverlayContent());
+	// updateButtons();
+	// }
 
 	/**
 	 * Sets the visibility of the cancel button in the footer. Also affects the layout of the footer.
